@@ -10,6 +10,16 @@ const io = require('socket.io')(server, {
     methods: ['GET', 'POST'],
   },
 });
+
+
+io.on("connection", (socket) => {
+  console.log("connected")
+  socket.on('disconnect', function () {
+    console.log("disconnected")
+    // socket.emit('disconnected');
+});
+});
+
 app.use(express.json());
 
 // middleware

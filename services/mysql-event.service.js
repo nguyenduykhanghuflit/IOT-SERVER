@@ -35,3 +35,4 @@ module.exports = monitorMysql = async (io) => {
   instance.on(MySQLEvents.EVENTS.CONNECTION_ERROR, console.error);
   instance.on(MySQLEvents.EVENTS.ZONGJI_ERROR, console.error);
 };
+
