@@ -111,4 +111,43 @@ router.get('/device', authMiddleware.Logged, async (req, res) => {
   }
 });
 
+//create device
+router.post('/device', authMiddleware.Logged, async (req, res) => {
+  try {
+    const info = req.body;
+    const iduser = req.iduser;
+    const requiredFields = [
+      'name',
+      'gender',
+      'age',
+      'weight',
+      'height',
+      'date',
+      'time',
+      'nickname',
+    ];
+    const missingFields = requiredFields.filter((field) => !info[field]);
+    if (missingFields.length > 0) {
+      return res.send(ok(null, 400, 'Vui lòng nhập đủ thông tin'));
+    }
+
+    const { name, gender, age, weight, height, date, time, nickname } = info;
+
+    const [result] = await db.query(
+      'INSERT INTO device (name, gender, age, weight, height, date, time, nickname,iduser ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      [name, gender, age, weight, height, date, time, nickname, iduser]
+    );
+
+    const iddevice = result.insertId;
+    return res.send(ok({ iddevice }));
+  } catch (error) {
+    console.log(error);
+    return res.send(ok(null, 500, error));
+  }
+});
+
+//update device info
+
+//delete device
+
 module.exports = router;

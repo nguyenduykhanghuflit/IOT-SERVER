@@ -11,13 +11,12 @@ const io = require('socket.io')(server, {
   },
 });
 
-
-io.on("connection", (socket) => {
-  console.log("connected")
+io.on('connection', (socket) => {
+  console.log('connected');
   socket.on('disconnect', function () {
-    console.log("disconnected")
+    console.log('disconnected');
     // socket.emit('disconnected');
-});
+  });
 });
 
 app.use(express.json());
@@ -25,6 +24,28 @@ app.use(express.json());
 // middleware
 var cors = require('cors');
 app.use(cors({ credentials: true, origin: true }));
+const helmet = require('helmet');
+app.use(helmet());
+
+const morgan = require('morgan');
+app.use(
+  morgan(
+    ':method :url :status :res[content-length] - :response-time ms  :date[clf]'
+  )
+);
+// compress responses
+const compression = require('compression');
+app.use(compression());
+
+// add body-parser
+app.use(express.json());
+app.use(
+  express.urlencoded({
+    extended: true,
+  })
+);
+const path = require('path');
+app.use('/static/', express.static(path.join(__dirname, '/public/images/')));
 
 //service mysql
 const monitorMysql = require('./services/mysql-event.service');
