@@ -100,8 +100,8 @@ router.get('/user', authMiddleware.Logged, async (req, res) => {
 });
 
 //update info user
-router.patch(
-  '/user',
+router.post(
+  '/user/update',
   authMiddleware.Logged,
   upload.single('avt'),
   async (req, res) => {
@@ -202,8 +202,8 @@ router.post('/device', authMiddleware.Logged, async (req, res) => {
 });
 
 //update device info
-router.patch(
-  '/device',
+router.post(
+  '/device/update',
   authMiddleware.Logged,
   upload.single('avt'),
   async (req, res) => {
