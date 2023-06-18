@@ -86,7 +86,9 @@ router.post('/login', async (req, res) => {
 router.get('/user/devices', authMiddleware.Logged, async (req, res) => {
   try {
     const iduser = req.iduser;
-    let queryDevice = `select * from device where iduser='${iduser}'`;
+    let queryDevice = `
+    select * from device where iduser='${iduser}' 
+    `;
     const [data] = await db.query(queryDevice);
 
     return res.send(ok(data));
@@ -101,7 +103,12 @@ router.get('/device', authMiddleware.Logged, async (req, res) => {
   try {
     const { iddevice } = req.query;
 
-    let queryData = `select * from device_data where iddevice='${iddevice}'`;
+    let queryData = `
+    select * from device_data 
+    where iddevice='${iddevice}'
+    ORDER BY CONCAT(date, ' ', time) DESC
+    LIMIT 10
+    `;
     const [data] = await db.query(queryData);
 
     return res.send(ok(data));
