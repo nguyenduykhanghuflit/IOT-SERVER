@@ -106,10 +106,9 @@ router.post(
   upload.single('avt'),
   async (req, res) => {
     try {
-      const filePath = req.file?.path || null;
       const iduser = req.iduser;
 
-      const { fullname, password, email, phone } = req.body;
+      const { fullname, password, email, phone, avt } = req.body;
       const query = `
           UPDATE user
           SET 
@@ -117,7 +116,7 @@ router.post(
           password = IFNULL(${db.escape(password)}, password),
           email = IFNULL(${db.escape(email)}, email),
           phone = IFNULL(${db.escape(phone)}, phone),
-          avt = IFNULL(${db.escape(filePath)}, avt) 
+          avt = IFNULL(${db.escape(avt)}, avt) 
           WHERE iduser = ${db.escape(iduser)};
         `;
 
@@ -202,19 +201,13 @@ router.post('/device', authMiddleware.Logged, async (req, res) => {
 });
 
 //update device info
-router.post(
-  '/device/update',
-  authMiddleware.Logged,
-  upload.single('avt'),
-  async (req, res) => {
-    try {
-      const filePath = req.file?.path || null;
-      const { iddevice } = req.query;
-      if (!iddevice)
-        return res.send(ok(null, 400, 'Vui lòng cho biết iddevice'));
-      const { name, gender, age, weight, height, date, time, nickname } =
-        req.body;
-      const query = `
+router.post('/device/update', authMiddleware.Logged, async (req, res) => {
+  try {
+    const { iddevice } = req.query;
+    if (!iddevice) return res.send(ok(null, 400, 'Vui lòng cho biết iddevice'));
+    const { name, gender, age, weight, height, date, time, nickname, avt } =
+      req.body;
+    const query = `
           UPDATE device
           SET 
           name = IFNULL(${db.escape(name)}, name),
@@ -224,19 +217,18 @@ router.post(
           height = IFNULL(${db.escape(height)}, height),
           date = IFNULL(${db.escape(date)}, date),
           time = IFNULL(${db.escape(time)}, time),
-          avt = IFNULL(${db.escape(filePath)}, avt),
+          avt = IFNULL(${db.escape(avt)}, avt),
           nickname = IFNULL(${db.escape(nickname)}, nickname)
           WHERE iddevice = ${db.escape(iddevice)};
         `;
 
-      const [result] = await db.query(query);
-      res.send(ok(result));
-    } catch (error) {
-      console.log(error);
-      return res.send(ok(null, 500, error));
-    }
+    const [result] = await db.query(query);
+    res.send(ok(result));
+  } catch (error) {
+    console.log(error);
+    return res.send(ok(null, 500, error));
   }
-);
+});
 
 //delete device
 router.delete('/device', authMiddleware.Logged, async (req, res) => {
@@ -259,4 +251,18 @@ router.delete('/device', authMiddleware.Logged, async (req, res) => {
   }
 });
 
+router.post(
+  '/upload-media',
+  authMiddleware.Logged,
+  upload.single('avt'),
+  async (req, res) => {
+    try {
+      const filePath = req.file?.path;
+      return res.send(ok(filePath));
+    } catch (error) {
+      console.log(error);
+      return res.send(ok(null, 500, error));
+    }
+  }
+);
 module.exports = router;
