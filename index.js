@@ -45,7 +45,10 @@ app.use(
   })
 );
 const path = require('path');
-app.use('/static/', express.static(path.join(__dirname, '/public/images/')));
+app.use(
+  '/public/images/',
+  express.static(path.join(__dirname, '/public/images/'))
+);
 
 //service mysql
 const monitorMysql = require('./services/mysql-event.service');

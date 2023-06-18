@@ -4,7 +4,7 @@ const db = require('../database/connect-mysql');
 const ok = require('../utils/response');
 const jwt = require('jsonwebtoken');
 const authMiddleware = require('../middleware/auth.middleware');
-
+const upload = require('../middleware/upload.middleware');
 // ping server
 router.get('/ping', authMiddleware.Logged, async (req, res) => {
   try {
@@ -82,6 +82,54 @@ router.post('/login', async (req, res) => {
   }
 });
 
+//get info user
+router.get('/user', authMiddleware.Logged, async (req, res) => {
+  try {
+    const iduser = req.iduser;
+
+    const query = `
+          select email,phone,fullname,avt,iduser from user where iduser=${iduser}
+        `;
+
+    const [result] = await db.query(query);
+    res.send(ok(result));
+  } catch (error) {
+    console.log(error);
+    return res.send(ok(null, 500, error));
+  }
+});
+
+//update info user
+router.patch(
+  '/user',
+  authMiddleware.Logged,
+  upload.single('avt'),
+  async (req, res) => {
+    try {
+      const filePath = req.file?.path || null;
+      const iduser = req.iduser;
+
+      const { fullname, password, email, phone } = req.body;
+      const query = `
+          UPDATE user
+          SET 
+          fullname = IFNULL(${db.escape(fullname)}, fullname),
+          password = IFNULL(${db.escape(password)}, password),
+          email = IFNULL(${db.escape(email)}, email),
+          phone = IFNULL(${db.escape(phone)}, phone),
+          avt = IFNULL(${db.escape(filePath)}, avt) 
+          WHERE iduser = ${db.escape(iduser)};
+        `;
+
+      const [result] = await db.query(query);
+      res.send(ok(result));
+    } catch (error) {
+      console.log(error);
+      return res.send(ok(null, 500, error));
+    }
+  }
+);
+
 //get list device of user
 router.get('/user/devices', authMiddleware.Logged, async (req, res) => {
   try {
@@ -154,7 +202,61 @@ router.post('/device', authMiddleware.Logged, async (req, res) => {
 });
 
 //update device info
+router.patch(
+  '/device',
+  authMiddleware.Logged,
+  upload.single('avt'),
+  async (req, res) => {
+    try {
+      const filePath = req.file?.path || null;
+      const { iddevice } = req.query;
+      if (!iddevice)
+        return res.send(ok(null, 400, 'Vui lòng cho biết iddevice'));
+      const { name, gender, age, weight, height, date, time, nickname } =
+        req.body;
+      const query = `
+          UPDATE device
+          SET 
+          name = IFNULL(${db.escape(name)}, name),
+          gender = IFNULL(${db.escape(gender)}, gender),
+          age = IFNULL(${db.escape(age)}, age),
+          weight = IFNULL(${db.escape(weight)}, weight),
+          height = IFNULL(${db.escape(height)}, height),
+          date = IFNULL(${db.escape(date)}, date),
+          time = IFNULL(${db.escape(time)}, time),
+          avt = IFNULL(${db.escape(filePath)}, avt),
+          nickname = IFNULL(${db.escape(nickname)}, nickname)
+          WHERE iddevice = ${db.escape(iddevice)};
+        `;
+
+      const [result] = await db.query(query);
+      res.send(ok(result));
+    } catch (error) {
+      console.log(error);
+      return res.send(ok(null, 500, error));
+    }
+  }
+);
 
 //delete device
+router.delete('/device', authMiddleware.Logged, async (req, res) => {
+  try {
+    const { iddevice } = req.query;
+
+    let queryDeleteDevice = `
+    DELETE FROM device WHERE iddevice=${iddevice};
+    `;
+    let queryDeleteDeviceData = `
+    DELETE FROM device_data WHERE iddevice=${iddevice};
+    `;
+    const [deleteDevice] = await db.query(queryDeleteDevice);
+    const [deleteDeviceData] = await db.query(queryDeleteDeviceData);
+
+    return res.send(ok({ deleteDevice, deleteDeviceData }));
+  } catch (error) {
+    console.log(error);
+    return res.send(ok(null, 500, error));
+  }
+});
 
 module.exports = router;
