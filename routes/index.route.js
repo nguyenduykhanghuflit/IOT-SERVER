@@ -112,11 +112,11 @@ router.post(
 
       if (password) {
         if (!oldPassword)
-          return res.send(ok(null, 400, 'oldPassword is require'));
+          return res.send(ok(null, 400, 'Chưa nhập mật khẩu cũ'));
         const getUserByPassAndId = `SELECT 1 FROM user where iduser=${iduser} and password=${oldPassword}`;
         const [result] = await db.query(getUserByPassAndId);
         if (result.length == 0)
-          return res.send(ok(null, 400, 'oldPassword invalid'));
+          return res.send(ok(null, 400, 'Mật khẩu cũ không đúng'));
       }
 
       const query = `
