@@ -170,16 +170,7 @@ router.post('/device', authMiddleware.Logged, async (req, res) => {
   try {
     const info = req.body;
     const iduser = req.iduser;
-    const requiredFields = [
-      'name',
-      'gender',
-      'age',
-      'weight',
-      'height',
-      'date',
-      'time',
-      'nickname',
-    ];
+    const requiredFields = ['name', 'gender', 'age', 'weight', 'height'];
     const missingFields = requiredFields.filter((field) => !info[field]);
     if (missingFields.length > 0) {
       return res.send(ok(null, 400, 'Vui lòng nhập đủ thông tin'));
