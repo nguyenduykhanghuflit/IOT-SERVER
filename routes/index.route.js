@@ -108,7 +108,17 @@ router.post(
     try {
       const iduser = req.iduser;
 
-      const { fullname, password, email, phone, avt } = req.body;
+      const { fullname, password, email, phone, avt, oldPassword } = req.body;
+
+      if (password) {
+        if (!oldPassword)
+          return res.send(ok(null, 400, 'oldPassword is require'));
+        const getUserByPassAndId = `SELECT 1 FROM user where iduser=${iduser} and password=${oldPassword}`;
+        const [result] = await db.query(getUserByPassAndId);
+        if (result.length == 0)
+          return res.send(ok(null, 400, 'oldPassword invalid'));
+      }
+
       const query = `
           UPDATE user
           SET 
